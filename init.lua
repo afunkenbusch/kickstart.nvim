@@ -662,6 +662,7 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'prettier', -- Used to format JS/TS/JSON/CSS/HTML/Markdown
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -714,11 +715,33 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
-        -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
-        --
-        -- You can use 'stop_after_first' to run the first available formatter from the list
-        -- javascript = { "prettierd", "prettier", stop_after_first = true },
+        javascript = { 'prettier' },
+        typescript = { 'prettier' },
+        javascriptreact = { 'prettier' },
+        typescriptreact = { 'prettier' },
+        json = { 'prettier' },
+        css = { 'prettier' },
+        scss = { 'prettier' },
+        html = { 'prettier' },
+        markdown = { 'prettier' },
+      },
+      formatters = {
+        prettier = {
+          -- Dynamically find the correct working directory with Prettier config
+          cwd = function(self, ctx)
+            local util = require 'conform.util'
+            -- Look for Prettier config files in current directory and parents
+            return util.root_file {
+              '.prettierrc',
+              '.prettierrc.json',
+              '.prettierrc.js',
+              '.prettierrc.yaml',
+              '.prettierrc.yml',
+              'prettier.config.js',
+              'package.json', -- package.json might contain prettier config
+            }(self, ctx)
+          end,
+        },
       },
     },
   },
